@@ -2,7 +2,7 @@
 
 Https Certificate pinning for Flutter
 
-This project ins based on [ssl_pinning_plugin](https://github.com/macif-dev/ssl_pinning_plugin) 
+This project is based on [ssl_pinning_plugin](https://github.com/macif-dev/ssl_pinning_plugin) 
 
 Any help is appreciated! Comment, suggestions, issues, PR's!
 
@@ -13,7 +13,7 @@ In your flutter or dart project add the dependency:
 ```yml
 dependencies:
   ...
-  http_certificate_pinning: 3.0.0
+  http_certificate_pinning: 3.0.1
 ```
 
 ## Get Certificate FingerPrint
@@ -37,15 +37,15 @@ The Result is like:
 import 'package:http_certificate_pinning/http_certificate_pinning.dart';
   
   // Add CertificatePinningInterceptor in dio Client
-  Dio getClient(String baseUrl, List<String> allowedSHAFingerprints){
-      var dio =  Dio(BaseOptions(baseUrl: baseUrl))
+  Dio getClient(String baseUrl, List<String> allowedSHAFingerprints) {
+      var dio = Dio(BaseOptions(baseUrl: baseUrl))
         ..interceptors.add(CertificatePinningInterceptor(allowedSHAFingerprints));
       return dio;
   }
 
-  myRepositoryMethod(){ 
+  myRepositoryMethod() {
     dio.get("myurl.com");
-  }    
+  }
 ```
 
 ### Using Http
@@ -54,15 +54,14 @@ import 'package:http_certificate_pinning/http_certificate_pinning.dart';
 import 'package:http_certificate_pinning/secure_http_client.dart';
   
   // Uses SecureHttpClient to make requests
-  SecureHttpClient getClient(List<String> allowedSHAFingerprints){
+  SecureHttpClient getClient(List<String> allowedSHAFingerprints) {
       final secureClient = SecureHttpClient.build(certificateSHA256Fingerprints);
       return secureClient;
   }
 
-  myRepositoryMethod(){ 
+  myRepositoryMethod() {
     secureClient.get("myurl.com");
-  }    
-
+  }
 ```
 
 ### Other Client
@@ -71,23 +70,18 @@ import 'package:http_certificate_pinning/secure_http_client.dart';
 import 'package:http_certificate_pinning/http_certificate_pinning.dart';
   
 Future myCustomImplementation(String url, Map<String,String> headers, List<String> allowedSHAFingerprints) async {
-  try{
+  try {
     final secure = await HttpCertificatePinning.check(
       serverURL: url,
       headerHttp: headers,
       sha: SHA.SHA256,
-      allowedSHAFingerprints:allowedSHAFingerprints,
+      allowedSHAFingerprints: allowedSHAFingerprints,
       timeout : 50
     );
 
-    if(secure.contains("CONNECTION_SECURE")){
-      return true;
-    }else{
-      return false;
-    }
-  }catch(e){
+    return secure.contains("CONNECTION_SECURE");
+  } catch(e) {
     return false;
   }
 }
-
 ```
