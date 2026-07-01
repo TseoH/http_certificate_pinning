@@ -15,7 +15,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.9.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.0"),
-        .package(name: "FlutterFramework", path: "../FlutterFramework")
+        .package(path: "../FlutterFramework")
     ],
     targets: [
         .target(
