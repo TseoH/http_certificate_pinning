@@ -13,11 +13,11 @@ Https Certificate pinning for Flutter
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Diefferson Santos' => 'diefferson.sts@gmail.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'http_certificate_pinning/Sources/http_certificate_pinning/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'CryptoSwift'
   s.dependency 'Alamofire', '~> 5.9.0'
-  s.platform = :ios, '8.0'
+  s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
