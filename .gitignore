@@ -5,6 +5,8 @@
 .pub/
 
 build/
+.build/
+.swiftpm/
 
 .fvm/flutter_sdk
 
