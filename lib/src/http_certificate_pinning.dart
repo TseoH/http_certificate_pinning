@@ -27,7 +27,7 @@ class HttpCertificatePinning {
     final Map<String, dynamic> params = <String, dynamic>{
       "url": serverURL,
       "headers": headerHttp ?? {},
-      "type": sha.toString().split(".").last,
+      "type": sha.name,
       "fingerprints":
           allowedSHAFingerprints.map((a) => a.replaceAll(":", "")).toList(),
       "timeout": timeout
