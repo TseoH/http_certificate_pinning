@@ -152,8 +152,9 @@ class HttpCertificatePinning {
     return resp;
   }
 
-  static String _normalizePin(String pin) =>
-      pin.trim().replaceFirst('sha256/', '');
+  static String _normalizePin(String pin) => pin
+      .replaceAll(RegExp(r'\s+'), '')
+      .replaceFirst('sha256/', '');
 
   Future _platformCallHandler(MethodCall call) async {
     print("_platformCallHandler call ${call.method} ${call.arguments}");

@@ -5,7 +5,6 @@
 //
 
 import Foundation
-import CommonCrypto
 import Alamofire
 
 /// The position of a certificate in the server's trust chain.

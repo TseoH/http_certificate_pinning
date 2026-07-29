@@ -108,13 +108,20 @@ public class HttpCertificatePinningPlugin : FlutterPlugin, MethodCallHandler {
 
 
   private fun handleCheckPublicKeysEvent(call: MethodCall, result: Result) {
-    val arguments: HashMap<String, Any> = call.arguments as HashMap<String, Any>
-    val serverURL: String = arguments.get("url") as String
-    val leafPublicKeyHashes: List<String> = arguments.get("leafPublicKeyHashes") as List<String>
-    val intermediatePublicKeyHashes: List<String> = (arguments.get("intermediatePublicKeyHashes") as? List<String>) ?: listOf()
-    val httpHeaderArgs: Map<String, String> = arguments.get("headers") as Map<String, String>
-    val timeout: Int = (arguments.get("timeout") as? Int) ?: 60
-    val allowCache: Boolean = (arguments.get("allowCache") as? Boolean) ?: true
+    val arguments: HashMap<String, Any>? = call.arguments as? HashMap<String, Any>
+    val serverURL: String? = arguments?.get("url") as? String
+    val leafPublicKeyHashes: List<String>? = arguments?.get("leafPublicKeyHashes") as? List<String>
+    val intermediatePublicKeyHashes: List<String> = (arguments?.get("intermediatePublicKeyHashes") as? List<String>) ?: listOf()
+    val httpHeaderArgs: Map<String, String> = (arguments?.get("headers") as? Map<String, String>) ?: mapOf()
+    val timeout: Int = (arguments?.get("timeout") as? Int) ?: 60
+    val allowCache: Boolean = (arguments?.get("allowCache") as? Boolean) ?: true
+
+    if (serverURL == null || leafPublicKeyHashes == null) {
+      handler?.post {
+        result.error("Params incorrect", "The provided parameters are incorrect", null)
+      }
+      return
+    }
 
     this.respondToPublicKeyCheck(result) {
       this.checkPublicKeyConnexion(serverURL, leafPublicKeyHashes, intermediatePublicKeyHashes, httpHeaderArgs, timeout, allowCache)
@@ -122,12 +129,19 @@ public class HttpCertificatePinningPlugin : FlutterPlugin, MethodCallHandler {
   }
 
   private fun handleCheckPositionEvent(call: MethodCall, result: Result, position: String) {
-    val arguments: HashMap<String, Any> = call.arguments as HashMap<String, Any>
-    val serverURL: String = arguments.get("url") as String
-    val publicKeyHashes: List<String> = arguments.get("publicKeyHashes") as List<String>
-    val httpHeaderArgs: Map<String, String> = arguments.get("headers") as Map<String, String>
-    val timeout: Int = (arguments.get("timeout") as? Int) ?: 60
-    val allowCache: Boolean = (arguments.get("allowCache") as? Boolean) ?: true
+    val arguments: HashMap<String, Any>? = call.arguments as? HashMap<String, Any>
+    val serverURL: String? = arguments?.get("url") as? String
+    val publicKeyHashes: List<String>? = arguments?.get("publicKeyHashes") as? List<String>
+    val httpHeaderArgs: Map<String, String> = (arguments?.get("headers") as? Map<String, String>) ?: mapOf()
+    val timeout: Int = (arguments?.get("timeout") as? Int) ?: 60
+    val allowCache: Boolean = (arguments?.get("allowCache") as? Boolean) ?: true
+
+    if (serverURL == null || publicKeyHashes == null) {
+      handler?.post {
+        result.error("Params incorrect", "The provided parameters are incorrect", null)
+      }
+      return
+    }
 
     this.respondToPublicKeyCheck(result) {
       val chain = this.getServerCertificates(serverURL, timeout, httpHeaderArgs, allowCache)
@@ -180,7 +194,7 @@ public class HttpCertificatePinningPlugin : FlutterPlugin, MethodCallHandler {
 
   // The chain is ordered leaf first, root last. The intermediate sits between leaf and
   // root, so it only exists in chains of 3+. Note: the root is the last certificate the
-  // server sent, which some servers omit — root pinning then fails as CONNECTION_NOT_SECURE.
+  // server sent, which some servers omit; root pinning then fails as CONNECTION_NOT_SECURE.
   private fun certificateAt(position: String, chain: List<Certificate>): Certificate? = when (position) {
     "leaf" -> chain.firstOrNull()
     "intermediate" -> if (chain.size > 2) chain[1] else null
@@ -192,16 +206,24 @@ public class HttpCertificatePinningPlugin : FlutterPlugin, MethodCallHandler {
   private fun getServerCertificates(httpsURL: String, connectTimeout: Int, httpHeaderArgs: Map<String, String>, allowCache: Boolean = true): List<Certificate> {
     val url = URL(httpsURL)
     val httpClient: HttpsURLConnection = url.openConnection() as HttpsURLConnection
-    httpClient.useCaches = allowCache
-    if (connectTimeout > 0)
-      httpClient.connectTimeout = connectTimeout * 1000
-    httpHeaderArgs.forEach { (key, value) -> httpClient.setRequestProperty(key, value) }
+    try {
+      httpClient.useCaches = allowCache
+      if (!allowCache) {
+        // useCaches only disables the response cache; keep-alive pooling could still
+        // reuse a TLS connection to the same host. Closing the connection makes a
+        // cache-disabled check observe a fresh handshake.
+        httpClient.setRequestProperty("Connection", "close")
+      }
+      if (connectTimeout > 0)
+        httpClient.connectTimeout = connectTimeout * 1000
+      httpHeaderArgs.forEach { (key, value) -> httpClient.setRequestProperty(key, value) }
 
-    httpClient.connect()
+      httpClient.connect()
 
-    val certificates = httpClient.serverCertificates.toList()
-    httpClient.disconnect()
-    return certificates
+      return httpClient.serverCertificates.toList()
+    } finally {
+      httpClient.disconnect()
+    }
   }
 
   // PublicKey.getEncoded() returns the DER SubjectPublicKeyInfo, so this hash matches

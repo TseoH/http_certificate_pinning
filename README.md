@@ -114,7 +114,7 @@ key.
 To get a public key pin from a certificate file (works for a leaf, intermediate
 or root CA certificate alike), run in console:
 
-```
+```sh
 openssl x509 -in [certificate-file.crt] -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
 ```
 
@@ -125,20 +125,26 @@ The result is like:
 The pins can also be read directly from a live server. For the intermediate pin
 (second certificate of the served chain):
 
-```
+```sh
 openssl s_client -connect yourdomain.com:443 -servername yourdomain.com -showcerts </dev/null 2>/dev/null | awk '/BEGIN CERTIFICATE/{n++} n==2' | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
 ```
 
+Careful: the second certificate is the intermediate only when the served chain
+contains at least three certificates. In a two-certificate chain (leaf + root)
+this command returns the root pin instead, which `checkIntermediate` will never
+match, since the intermediate check requires a chain of three or more.
+
 For the root pin (last certificate of the served chain):
 
-```
+```sh
 openssl s_client -connect yourdomain.com:443 -servername yourdomain.com -showcerts </dev/null 2>/dev/null | awk '/BEGIN CERTIFICATE/{n++} {c[n]=c[n] $0 "\n"} END{printf "%s", c[n]}' | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
 ```
 
 Alternatively, the repository ships a helper script that prints the pin of every
-certificate in a server's chain, labeled by position:
+certificate in a server's chain, labeled by position (it labels positions
+correctly even for two-certificate chains, so it avoids the pitfall above):
 
-```
+```sh
 ./get_public_key_pins.sh yourdomain.com
 ```
 
