@@ -1,9 +1,9 @@
 {
-    "[dart]": {
-      "editor.formatOnSave": true
-    },
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": true
-    },
-  }
-  
+  "[dart]": {
+    "editor.formatOnSave": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "dart.flutterSdkPath": ".fvm/versions/3.41.9"
+}
