@@ -41,8 +41,8 @@ class HttpCertificatePinning {
   /// `openssl x509 -pubkey | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64`.
   ///
   /// The connection is secure when the leaf key matches one of
-  /// [allowedLeafPublicKeyHashes], or — failing that — the intermediate CA key
-  /// matches one of [allowedIntermediatePublicKeyHashes]. Pinning the
+  /// [allowedLeafPublicKeyHashes], or, failing that, when the intermediate CA
+  /// key matches one of [allowedIntermediatePublicKeyHashes]. Pinning the
   /// intermediate survives leaf certificate rotations.
   ///
   /// Pins may carry the conventional `sha256/` prefix; it is stripped before
@@ -115,7 +115,7 @@ class HttpCertificatePinning {
   /// Checks that the root CA public key matches one of [publicKeyHashes].
   ///
   /// On iOS the root comes from the evaluated trust chain (the system trust
-  /// store anchor). On Android it is the last certificate the server sent —
+  /// store anchor). On Android it is the last certificate the server sent;
   /// some servers omit the root, in which case this check fails.
   static Future<String> checkRoot({
     required String serverURL,
