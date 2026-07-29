@@ -1,6 +1,6 @@
 # Http Certificate Pinning
 
-Https Certificate pinning for Flutter. Two pinning strategies are supported:
+HTTPS certificate pinning for Flutter. Two pinning strategies are supported:
 
 - **Certificate fingerprint pinning**: pin the SHA-1/SHA-256 fingerprint of the whole certificate.
 - **Public key pinning (SPKI)**: pin the SHA-256 hash of a certificate's public key, at the leaf, intermediate or root position of the chain.
